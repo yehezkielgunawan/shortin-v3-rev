@@ -23,7 +23,7 @@ export default function RedirectPage({ code }: RedirectPageProps) {
             if (mounted) {
               window.location.href = data.url;
             }
-          }, 3000);
+          }, 2000);
         } else {
           throw new Error(data.error || "Short code not found");
         }
