@@ -60,7 +60,7 @@ app.post("/api/shorten", async (c) => {
     });
 
     const data = await response.json();
-    return c.json(data, response.status);
+    return c.json(data, response.status as any);
   } catch (error) {
     return c.json({ error: "Failed to shorten URL" }, 500);
   }
@@ -75,7 +75,7 @@ app.get("/api/:code", async (c) => {
 
     const response = await fetch(`${apiEndpoint}/${code}`);
     const data = await response.json();
-    return c.json(data, response.status);
+    return c.json(data, response.status as any);
   } catch (error) {
     return c.json({ error: "Failed to fetch URL" }, 500);
   }
@@ -90,7 +90,7 @@ app.get("/api/:code/stats", async (c) => {
 
     const response = await fetch(`${apiEndpoint}/${code}/stats`);
     const data = await response.json();
-    return c.json(data, response.status);
+    return c.json(data, response.status as any);
   } catch (error) {
     return c.json({ error: "Failed to fetch stats" }, 500);
   }
@@ -111,7 +111,7 @@ app.put("/api/:code", async (c) => {
     });
 
     const data = await response.json();
-    return c.json(data, response.status);
+    return c.json(data, response.status as any);
   } catch (error) {
     return c.json({ error: "Failed to update URL" }, 500);
   }
@@ -129,7 +129,7 @@ app.delete("/api/:code", async (c) => {
     });
 
     const data = await response.json();
-    return c.json(data, response.status);
+    return c.json(data, response.status as any);
   } catch (error) {
     return c.json({ error: "Failed to delete URL" }, 500);
   }
