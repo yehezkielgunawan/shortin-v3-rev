@@ -1,5 +1,5 @@
 import { render } from 'hono/jsx/dom'
-import RedirectPage from '../components/RedirectPage'
+import RedirectPage from '@/components/RedirectPage'
 
 const container = document.getElementById('redirect-container')
 const scriptTag = document.querySelector('script[data-code]')

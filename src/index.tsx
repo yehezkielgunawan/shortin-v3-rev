@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { renderer } from "./renderer";
+import { renderer } from "@/renderer";
 import { Script } from "vite-ssr-components/hono";
 
 type Bindings = {
