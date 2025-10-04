@@ -14,13 +14,16 @@ export default function RedirectPage({ code }: RedirectPageProps) {
     async function redirect() {
       try {
         const response = await fetch("/api/" + code);
-        const data = await response.json();
+        const data = (await response.json()) as {
+          url?: string;
+          error?: string;
+        };
 
         if (!mounted) return;
 
         if (response.ok && data.url) {
           setTimeout(() => {
-            if (mounted) {
+            if (mounted && data.url) {
               window.location.href = data.url;
             }
           }, 2000);
