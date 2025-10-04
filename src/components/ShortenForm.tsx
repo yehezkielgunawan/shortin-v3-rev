@@ -1,30 +1,100 @@
-import { useState } from "hono/jsx";
+import { useReducer } from "hono/jsx";
+
+// Define the state shape
+interface State {
+  url: string;
+  shortCodeInput: string;
+  loading: boolean;
+  result: any | null;
+  error: string;
+  warning: string;
+  copied: boolean;
+}
+
+// Define action types
+type Action =
+  | { type: "SET_URL"; payload: string }
+  | { type: "SET_SHORT_CODE"; payload: string }
+  | { type: "SUBMIT_START" }
+  | { type: "SUBMIT_SUCCESS"; payload: { result: any; warning?: string } }
+  | { type: "SUBMIT_ERROR"; payload: string }
+  | { type: "COPY_SUCCESS" }
+  | { type: "COPY_RESET" }
+  | { type: "RESET_MESSAGES" };
+
+// Initial state
+const initialState: State = {
+  url: "",
+  shortCodeInput: "",
+  loading: false,
+  result: null,
+  error: "",
+  warning: "",
+  copied: false,
+};
+
+// Reducer function
+function formReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_URL":
+      return { ...state, url: action.payload };
+    
+    case "SET_SHORT_CODE":
+      return { ...state, shortCodeInput: action.payload };
+    
+    case "SUBMIT_START":
+      return {
+        ...state,
+        loading: true,
+        result: null,
+        error: "",
+        warning: "",
+      };
+    
+    case "SUBMIT_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        result: action.payload.result,
+        warning: action.payload.warning || "",
+      };
+    
+    case "SUBMIT_ERROR":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    
+    case "COPY_SUCCESS":
+      return { ...state, copied: true };
+    
+    case "COPY_RESET":
+      return { ...state, copied: false };
+    
+    case "RESET_MESSAGES":
+      return { ...state, error: "", warning: "" };
+    
+    default:
+      return state;
+  }
+}
 
 export default function ShortenForm() {
-  const [url, setUrl] = useState("");
-  const [shortCodeInput, setShortCodeInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState("");
-  const [warning, setWarning] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [state, dispatch] = useReducer(formReducer, initialState);
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
-    // Reset states
-    setResult(null);
-    setError("");
-    setWarning("");
-    setLoading(true);
+    dispatch({ type: "SUBMIT_START" });
 
     try {
       const response = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url,
-          shortCodeInput: shortCodeInput || undefined,
+          url: state.url,
+          shortCodeInput: state.shortCodeInput || undefined,
         }),
       });
 
@@ -34,34 +104,33 @@ export default function ShortenForm() {
         throw new Error(data.error || "Failed to shorten URL");
       }
 
-      setResult(data);
-
-      // Check if there's a warning about old code
-      if (data.warning) {
-        setWarning(data.warning);
-      }
+      dispatch({
+        type: "SUBMIT_SUCCESS",
+        payload: {
+          result: data,
+          warning: data.warning,
+        },
+      });
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      dispatch({ type: "SUBMIT_ERROR", payload: err.message });
     }
   };
 
   const handleCopy = async () => {
-    if (!result) return;
+    if (!state.result) return;
 
-    const shortUrl = window.location.origin + "/r/" + result.shortCode;
+    const shortUrl = window.location.origin + "/r/" + state.result.shortCode;
     try {
       await navigator.clipboard.writeText(shortUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      dispatch({ type: "COPY_SUCCESS" });
+      setTimeout(() => dispatch({ type: "COPY_RESET" }), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
   };
 
-  const shortUrl = result
-    ? window.location.origin + "/r/" + result.shortCode
+  const shortUrl = state.result
+    ? window.location.origin + "/r/" + state.result.shortCode
     : "";
 
   return (
@@ -76,8 +145,13 @@ export default function ShortenForm() {
             id="url"
             required
             placeholder="https://example.com/long/url"
-            value={url}
-            onInput={(e) => setUrl((e.target as HTMLInputElement).value)}
+            value={state.url}
+            onInput={(e) =>
+              dispatch({
+                type: "SET_URL",
+                payload: (e.target as HTMLInputElement).value,
+              })
+            }
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
         </div>
@@ -94,9 +168,12 @@ export default function ShortenForm() {
             id="shortCodeInput"
             placeholder="custom123"
             pattern="[a-zA-Z0-9-_]+"
-            value={shortCodeInput}
+            value={state.shortCodeInput}
             onInput={(e) =>
-              setShortCodeInput((e.target as HTMLInputElement).value)
+              dispatch({
+                type: "SET_SHORT_CODE",
+                payload: (e.target as HTMLInputElement).value,
+              })
             }
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
@@ -107,14 +184,14 @@ export default function ShortenForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={state.loading}
           class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Shortening..." : "Shorten URL"}
+          {state.loading ? "Shortening..." : "Shorten URL"}
         </button>
       </form>
 
-      {result && (
+      {state.result && (
         <div class="mt-8 p-6 bg-green-50 border border-green-200 rounded-lg">
           <h3 class="text-lg font-semibold text-green-900 mb-3">Success!</h3>
           <div class="flex items-center gap-2">
@@ -126,32 +203,32 @@ export default function ShortenForm() {
             />
             <button
               onClick={handleCopy}
-              class={`px-4 py-2 ${copied ? "bg-green-800" : "bg-green-600"} text-white rounded-lg font-semibold hover:bg-green-700 transition`}
+              class={`px-4 py-2 ${state.copied ? "bg-green-800" : "bg-green-600"} text-white rounded-lg font-semibold hover:bg-green-700 transition`}
             >
-              {copied ? "Copied!" : "Copy"}
+              {state.copied ? "Copied!" : "Copy"}
             </button>
           </div>
           <div class="mt-3 text-sm text-gray-600">
-            Created: {new Date(result.createdAt).toLocaleString()} | Clicks:{" "}
-            {result.count}
+            Created: {new Date(state.result.createdAt).toLocaleString()} |
+            Clicks: {state.result.count}
           </div>
         </div>
       )}
 
-      {warning && (
+      {state.warning && (
         <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p class="text-yellow-800 flex items-start gap-2">
             <span class="text-xl">⚠️</span>
-            <span>{warning}</span>
+            <span>{state.warning}</span>
           </p>
         </div>
       )}
 
-      {error && (
+      {state.error && (
         <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
           <p class="text-red-800 flex items-start gap-2">
             <span class="text-xl">❌</span>
-            <span>{error}</span>
+            <span>{state.error}</span>
           </p>
         </div>
       )}
