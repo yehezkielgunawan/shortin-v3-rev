@@ -130,7 +130,7 @@ export default function ShortenForm() {
   };
 
   const shortUrl = state.result
-    ? window.location.origin + "/r/" + state.result.shortCode
+    ? window.location.origin + state.result.shortCode
     : "";
 
   return (
