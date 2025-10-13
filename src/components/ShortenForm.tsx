@@ -38,10 +38,10 @@ function formReducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_URL":
       return { ...state, url: action.payload };
-    
+
     case "SET_SHORT_CODE":
       return { ...state, shortCodeInput: action.payload };
-    
+
     case "SUBMIT_START":
       return {
         ...state,
@@ -50,7 +50,7 @@ function formReducer(state: State, action: Action): State {
         error: "",
         warning: "",
       };
-    
+
     case "SUBMIT_SUCCESS":
       return {
         ...state,
@@ -58,23 +58,23 @@ function formReducer(state: State, action: Action): State {
         result: action.payload.result,
         warning: action.payload.warning || "",
       };
-    
+
     case "SUBMIT_ERROR":
       return {
         ...state,
         loading: false,
         error: action.payload,
       };
-    
+
     case "COPY_SUCCESS":
       return { ...state, copied: true };
-    
+
     case "COPY_RESET":
       return { ...state, copied: false };
-    
+
     case "RESET_MESSAGES":
       return { ...state, error: "", warning: "" };
-    
+
     default:
       return state;
   }
@@ -119,7 +119,7 @@ export default function ShortenForm() {
   const handleCopy = async () => {
     if (!state.result) return;
 
-    const shortUrl = window.location.origin + "/r/" + state.result.shortCode;
+    const shortUrl = window.location.origin + state.result.shortCode;
     try {
       await navigator.clipboard.writeText(shortUrl);
       dispatch({ type: "COPY_SUCCESS" });
