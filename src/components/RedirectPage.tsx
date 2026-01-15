@@ -7,6 +7,7 @@ interface RedirectPageProps {
 export default function RedirectPage({ code }: RedirectPageProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState(2);
 
   useEffect(() => {
     let mounted = true;
@@ -22,6 +23,17 @@ export default function RedirectPage({ code }: RedirectPageProps) {
         if (!mounted) return;
 
         if (response.ok && data.url) {
+          // Start countdown
+          const countdownInterval = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
           setTimeout(() => {
             if (mounted && data.url) {
               window.location.href = data.url;
@@ -47,33 +59,61 @@ export default function RedirectPage({ code }: RedirectPageProps) {
 
   if (error) {
     return (
-      <div class="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center px-4">
+      <main 
+        class="min-h-screen bg-linear-to-br from-red-50 to-pink-100 flex items-center justify-center px-4"
+        role="main"
+        aria-labelledby="error-heading"
+      >
         <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
-          <div class="text-6xl mb-4">❌</div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Error</h1>
-          <p class="text-gray-600 mb-4">{error}</p>
+          <div aria-hidden="true" class="text-6xl mb-4">❌</div>
+          <h1 id="error-heading" class="text-2xl font-bold text-gray-900 mb-2">
+            Link Not Found
+          </h1>
+          <p class="text-gray-600 mb-6" role="alert">
+            {error}
+          </p>
           <a
             href="/"
-            class="inline-block bg-indigo-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition"
+            class="inline-block bg-indigo-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
           >
-            Go Home
+            Go to Homepage
           </a>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center px-4">
+    <main 
+      class="min-h-screen bg-linear-to-br from-indigo-50 to-purple-100 flex items-center justify-center px-4"
+      role="main"
+      aria-labelledby="redirect-heading"
+      aria-busy={loading}
+    >
       <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
-        <div class="mb-6">
-          <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-indigo-600"></div>
+        <div class="mb-6" aria-hidden="true">
+          <div 
+            class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-indigo-600"
+          ></div>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Redirecting...</h1>
-        <p class="text-gray-600">
+        
+        {/* Screen reader announcement */}
+        <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          Redirecting you to your destination in {countdown} seconds
+        </div>
+        
+        <h1 id="redirect-heading" class="text-2xl font-bold text-gray-900 mb-2">
+          Redirecting...
+        </h1>
+        <p class="text-gray-600 mb-4">
           Please wait while we take you to your destination.
         </p>
+        
+        {/* Visual countdown */}
+        <p class="text-sm text-indigo-600 font-medium" aria-hidden="true">
+          Redirecting in {countdown}s
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

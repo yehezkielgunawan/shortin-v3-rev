@@ -13,22 +13,31 @@ app.use(renderer);
 // Main page
 app.get("/", (c) => {
   return c.render(
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <main
+      id="main-content"
+      class="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8"
+      role="main"
+    >
       <div class="max-w-2xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-          <h1 class="text-4xl font-bold text-gray-900 mb-2 text-center">
-            URL Shortener
-          </h1>
-          <p class="text-gray-600 text-center mb-8">
-            Shorten your long URLs instantly
-          </p>
+        <article class="bg-white rounded-lg shadow-xl p-8">
+          <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">URL Shortener</h1>
+            <p class="text-gray-600">Shorten your long URLs instantly</p>
+          </header>
 
-          <div id="shorten-form-container"></div>
-        </div>
+          <div
+            id="shorten-form-container"
+            aria-label="URL shortening form"
+          ></div>
+        </article>
+
+        <footer class="mt-8 text-center text-sm text-gray-500">
+          <p>A simple, fast, and accessible URL shortener.</p>
+        </footer>
       </div>
 
       <Script type="module" src="/src/client/main.tsx" />
-    </div>,
+    </main>
   );
 });
 
@@ -41,7 +50,7 @@ app.get("/:code", async (c) => {
       <div id="redirect-container"></div>
 
       <Script type="module" src="/src/client/redirect.tsx" data-code={code} />
-    </>,
+    </>
   );
 });
 
