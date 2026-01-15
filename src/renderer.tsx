@@ -27,7 +27,7 @@ export const renderer = jsxRenderer(({ children }) => {
         />
         <meta
           property="og:image"
-          content="https://og-image.yehezgun.com/og?title=Shortin&description=A+minimalist+and+accessible+URL+shortener+service&siteName=shortin.yehezgun.com&social=Twitter%3A+%40yehezgun"
+          content="https://og-image.yehezgun.com/og?title=Shortin&description=A+minimalist+and+accessible+URL+shortener+service&siteName=shortin.yehezgun.com&social=Twitter%3A+%40yehezgun&image=https%3A%2F%2Fshortin.yehezgun.com%2Fimages%2Ficons%2Ficon512_maskable.png"
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -46,7 +46,7 @@ export const renderer = jsxRenderer(({ children }) => {
         />
         <meta
           name="twitter:image"
-          content="https://og-image.yehezgun.com/og?title=Shortin&description=A+minimalist+and+accessible+URL+shortener+service&siteName=shortin.yehezgun.com&social=Twitter%3A+%40yehezgun"
+          content="https://og-image.yehezgun.com/og?title=Shortin&description=A+minimalist+and+accessible+URL+shortener+service&siteName=shortin.yehezgun.com&social=Twitter%3A+%40yehezgun&image=https%3A%2F%2Fshortin.yehezgun.com%2Fimages%2Ficons%2Ficon512_maskable.png"
         />
         <meta name="twitter:creator" content="@yehezgun" />
       </head>
