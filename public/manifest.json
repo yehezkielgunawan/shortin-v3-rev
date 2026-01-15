@@ -1,0 +1,16 @@
+{
+  "name": "Shortin",
+  "short_name": "Shortin",
+  "description": "A minimalist and accessible URL shortener service. Shorten your long URLs instantly with custom short codes.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#4f46e5"
+}
