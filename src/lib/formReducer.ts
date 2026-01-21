@@ -15,6 +15,9 @@ export interface FormState {
   error: string;
   warning: string;
   copied: boolean;
+  showQrCode: boolean;
+  qrCodeDataUrl: string;
+  qrCodeLoading: boolean;
 }
 
 // Define action types
@@ -26,7 +29,10 @@ export type FormAction =
   | { type: "SUBMIT_ERROR"; payload: string }
   | { type: "COPY_SUCCESS" }
   | { type: "COPY_RESET" }
-  | { type: "RESET_MESSAGES" };
+  | { type: "RESET_MESSAGES" }
+  | { type: "QR_CODE_START" }
+  | { type: "QR_CODE_SUCCESS"; payload: string }
+  | { type: "QR_CODE_HIDE" };
 
 // Initial state
 export const initialFormState: FormState = {
@@ -37,6 +43,9 @@ export const initialFormState: FormState = {
   error: "",
   warning: "",
   copied: false,
+  showQrCode: false,
+  qrCodeDataUrl: "",
+  qrCodeLoading: false,
 };
 
 // Reducer function
@@ -55,6 +64,8 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         result: null,
         error: "",
         warning: "",
+        showQrCode: false,
+        qrCodeDataUrl: "",
       };
 
     case "SUBMIT_SUCCESS":
@@ -80,6 +91,15 @@ export function formReducer(state: FormState, action: FormAction): FormState {
 
     case "RESET_MESSAGES":
       return { ...state, error: "", warning: "" };
+
+    case "QR_CODE_START":
+      return { ...state, qrCodeLoading: true, showQrCode: true };
+
+    case "QR_CODE_SUCCESS":
+      return { ...state, qrCodeLoading: false, qrCodeDataUrl: action.payload };
+
+    case "QR_CODE_HIDE":
+      return { ...state, showQrCode: false, qrCodeDataUrl: "", qrCodeLoading: false };
 
     default:
       return state;

@@ -10,6 +10,7 @@ A minimalist, responsive, and accessible URL shortener service built with **Hono
 
 - 🔗 **URL Shortening** - Shorten long URLs instantly with auto-generated or custom short codes
 - 📋 **Copy to Clipboard** - One-click copy for generated short URLs
+- 📱 **QR Code Generation** - Generate downloadable QR codes for your shortened URLs
 - 📊 **Visit Statistics** - Track how many times your shortened links have been clicked
 - ♿ **Accessible (a11y)** - WCAG 2.1 compliant with screen reader support, keyboard navigation, and reduced motion support
 - 📱 **Responsive Design** - Beautiful UI that works on all devices
@@ -25,6 +26,7 @@ A minimalist, responsive, and accessible URL shortener service built with **Hono
 | [Vite](https://vitejs.dev) | Build tool and dev server |
 | [Cloudflare Workers](https://workers.cloudflare.com) | Edge deployment platform |
 | [Vitest](https://vitest.dev) | Unit testing framework |
+| [qrcode](https://www.npmjs.com/package/qrcode) | QR code generation |
 | [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) | Typography |
 
 ## 🚀 Getting Started
@@ -96,6 +98,12 @@ pnpm cf-typegen
 2. (Optional) Add a custom short code
 3. Click "Shorten URL"
 4. Copy the generated short URL
+
+### Generating a QR Code
+
+1. After shortening a URL, click the "Generate QR Code" button
+2. The QR code will be displayed with the shortened URL below it
+3. Click "Download QR Code" to save it as a PNG image
 
 ### Accessing a Shortened URL
 
@@ -207,7 +215,8 @@ shortin-v3-rev/
 │   │   ├── ShortenForm.tsx
 │   │   └── RedirectPage.tsx
 │   ├── lib/              # Shared utilities
-│   │   └── formReducer.ts
+│   │   ├── formReducer.ts
+│   │   └── qrcode.ts     # QR code generation utility
 │   ├── test/             # Test files
 │   │   ├── setup.ts
 │   │   ├── index.test.ts
