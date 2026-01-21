@@ -85,6 +85,8 @@ describe("formReducer", () => {
         },
         error: "Previous error",
         warning: "Previous warning",
+        showQrCode: true,
+        qrCodeDataUrl: "data:image/png;base64,old...",
       };
 
       const action: FormAction = { type: "SUBMIT_START" };
@@ -95,6 +97,8 @@ describe("formReducer", () => {
       expect(newState.result).toBeNull();
       expect(newState.error).toBe("");
       expect(newState.warning).toBe("");
+      expect(newState.showQrCode).toBe(false);
+      expect(newState.qrCodeDataUrl).toBe("");
       expect(newState.url).toBe("https://example.com"); // URL should be preserved
     });
   });
@@ -276,6 +280,85 @@ describe("formReducer", () => {
     });
   });
 
+  describe("QR_CODE_START action", () => {
+    it("should set qrCodeLoading to true and showQrCode to true", () => {
+      const currentState: FormState = {
+        ...initialFormState,
+        result: {
+          id: "id_123",
+          url: "https://example.com",
+          shortCode: "abc123",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+          count: 0,
+        },
+      };
+
+      const action: FormAction = { type: "QR_CODE_START" };
+
+      const newState = formReducer(currentState, action);
+
+      expect(newState.qrCodeLoading).toBe(true);
+      expect(newState.showQrCode).toBe(true);
+      expect(newState.result).not.toBeNull(); // Result should be preserved
+    });
+  });
+
+  describe("QR_CODE_SUCCESS action", () => {
+    it("should set qrCodeDataUrl and stop loading", () => {
+      const currentState: FormState = {
+        ...initialFormState,
+        qrCodeLoading: true,
+        showQrCode: true,
+        result: {
+          id: "id_123",
+          url: "https://example.com",
+          shortCode: "abc123",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+          count: 0,
+        },
+      };
+
+      const mockDataUrl = "data:image/png;base64,iVBORw0KGgo...";
+      const action: FormAction = { type: "QR_CODE_SUCCESS", payload: mockDataUrl };
+
+      const newState = formReducer(currentState, action);
+
+      expect(newState.qrCodeLoading).toBe(false);
+      expect(newState.qrCodeDataUrl).toBe(mockDataUrl);
+      expect(newState.showQrCode).toBe(true);
+    });
+  });
+
+  describe("QR_CODE_HIDE action", () => {
+    it("should hide QR code and reset loading state", () => {
+      const currentState: FormState = {
+        ...initialFormState,
+        showQrCode: true,
+        qrCodeDataUrl: "data:image/png;base64,iVBORw0KGgo...",
+        qrCodeLoading: true,
+        result: {
+          id: "id_123",
+          url: "https://example.com",
+          shortCode: "abc123",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+          count: 0,
+        },
+      };
+
+      const action: FormAction = { type: "QR_CODE_HIDE" };
+
+      const newState = formReducer(currentState, action);
+
+      expect(newState.showQrCode).toBe(false);
+      expect(newState.qrCodeDataUrl).toBe("");
+      expect(newState.qrCodeLoading).toBe(false);
+      expect(newState.result).not.toBeNull(); // Result should be preserved
+    });
+  });
+
   describe("Unknown action", () => {
     it("should return current state for unknown action types", () => {
       const currentState: FormState = {
@@ -303,6 +386,9 @@ describe("formReducer", () => {
         error: "",
         warning: "",
         copied: false,
+        showQrCode: false,
+        qrCodeDataUrl: "",
+        qrCodeLoading: false,
       });
     });
   });
@@ -368,6 +454,64 @@ describe("formReducer", () => {
       // User clears messages to retry
       state = formReducer(state, { type: "RESET_MESSAGES" });
       expect(state.error).toBe("");
+    });
+
+    it("should handle QR code generation flow", () => {
+      let state = initialFormState;
+
+      // Setup: URL shortened successfully
+      const result = {
+        id: "id_123",
+        url: "https://example.com/long",
+        shortCode: "mycode",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
+        count: 0,
+      };
+      state = formReducer(state, { type: "SUBMIT_SUCCESS", payload: { result } });
+      expect(state.result).toEqual(result);
+
+      // User clicks generate QR code
+      state = formReducer(state, { type: "QR_CODE_START" });
+      expect(state.qrCodeLoading).toBe(true);
+      expect(state.showQrCode).toBe(true);
+
+      // QR code generated successfully
+      const qrDataUrl = "data:image/png;base64,iVBORw0KGgo...";
+      state = formReducer(state, { type: "QR_CODE_SUCCESS", payload: qrDataUrl });
+      expect(state.qrCodeLoading).toBe(false);
+      expect(state.qrCodeDataUrl).toBe(qrDataUrl);
+      expect(state.showQrCode).toBe(true);
+
+      // User shortens a new URL - QR code should reset
+      state = formReducer(state, { type: "SUBMIT_START" });
+      expect(state.showQrCode).toBe(false);
+      expect(state.qrCodeDataUrl).toBe("");
+    });
+
+    it("should handle QR code generation failure", () => {
+      let state = initialFormState;
+
+      // Setup: URL shortened successfully
+      const result = {
+        id: "id_123",
+        url: "https://example.com/long",
+        shortCode: "mycode",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
+        count: 0,
+      };
+      state = formReducer(state, { type: "SUBMIT_SUCCESS", payload: { result } });
+
+      // User clicks generate QR code
+      state = formReducer(state, { type: "QR_CODE_START" });
+      expect(state.qrCodeLoading).toBe(true);
+
+      // QR code generation fails
+      state = formReducer(state, { type: "QR_CODE_HIDE" });
+      expect(state.qrCodeLoading).toBe(false);
+      expect(state.showQrCode).toBe(false);
+      expect(state.qrCodeDataUrl).toBe("");
     });
   });
 });
