@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { renderer } from "@/renderer";
 import { Script } from "vite-ssr-components/hono";
+import { generateRandomShortCode } from "@/lib/shortCode";
 
 type Bindings = {
   API_ENDPOINT: string;
@@ -62,10 +63,16 @@ app.post("/api/shorten", async (c) => {
     const apiEndpoint =
       c.env.API_ENDPOINT || "https://shortin-api.yehezgun.com";
 
+    // Generate random short code if none provided
+    const shortCodeInput = body.shortCodeInput || generateRandomShortCode(6);
+
     const response = await fetch(`${apiEndpoint}/shorten`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        ...body,
+        shortCodeInput,
+      }),
     });
 
     const data = await response.json();

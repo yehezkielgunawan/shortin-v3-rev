@@ -144,7 +144,7 @@ export default function ShortenForm() {
             type="text"
             id="shortCodeInput"
             name="shortCodeInput"
-            placeholder="custom123"
+            placeholder="Leave empty for random code"
             pattern="[a-zA-Z0-9-_]+"
             aria-describedby="shortcode-hint"
             value={state.shortCodeInput}
@@ -157,7 +157,7 @@ export default function ShortenForm() {
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
           <p id="shortcode-hint" class="mt-1 text-xs text-gray-500">
-            Only letters, numbers, hyphens, and underscores
+            Only letters, numbers, hyphens, and underscores. Leave empty for a random code.
           </p>
         </div>
 
