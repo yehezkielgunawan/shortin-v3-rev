@@ -15,7 +15,7 @@ It proxies requests to the real API endpoint (`API_ENDPOINT=https://shortin-api.
 
 * **Hono JS** for backend + routing
 * **Tailwind CSS** for responsive UI (light theme)
-* **hono/jsx** & **hono/jsx/dom** for client interactivity (no extra deps, maximize the JSX usage, instead of vanilla JS)
+* **hono/jsx** & **hono/jsx/dom** for client interactivity (no extra deps, maximize the JSX usage for client component manipulation, instead of vanilla JS)
 * **hono/validator** for request validation
 * **hono/adapter** for env variables
 * **pnpm** as package manager
@@ -47,7 +47,7 @@ Proxy to real API endpoint defined in `API_ENDPOINT`.
 ```json
 {
   "url": "https://www.example.com/some/long/url",
-  "shortCodeInput": "custom" // optional
+  "shortCodeInput": "custom" // optional - if empty, a random 6-character code will be generated
 }
 ```
 
@@ -57,7 +57,7 @@ Proxy to real API endpoint defined in `API_ENDPOINT`.
 {
   "id": "id_1620000000000_1234",
   "url": "https://www.example.com/some/long/url",
-  "shortCode": "custom",
+  "shortCode": "custom", // or randomly generated code like "aB3xYz"
   "createdAt": "2023-01-01T00:00:00.000Z",
   "updatedAt": "2023-01-01T00:00:00.000Z",
   "count": 0
@@ -157,15 +157,16 @@ Proxy to real API endpoint defined in `API_ENDPOINT`.
 ## Features
 
 1. Input form for long URL (+ optional custom short code).
-2. Validation (must be valid URL).
-3. Error handling:
+2. **Random short code generation** - If no custom code is provided, a random 6-character alphanumeric code is generated automatically.
+3. Validation (must be valid URL).
+4. Error handling:
 
    * Short code exists → show error.
    * If older than 3 months → warn but allow override.
-4. Copy-to-clipboard for generated short URL.
-5. Responsive light theme with Tailwind.
-6. Accessible (a11y compliant).
-7. Simple 3-second loading screen before redirect.
+5. Copy-to-clipboard for generated short URL.
+6. Responsive light theme with Tailwind.
+7. Accessible (a11y compliant).
+8. Simple 3-second loading screen before redirect.
 
 ---
 
