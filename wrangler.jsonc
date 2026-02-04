@@ -4,6 +4,12 @@
   "compatibility_date": "2025-08-03",
   "main": "./src/index.tsx",
   "vars": {
-    "API_ENDPOINT": "https://shortin-api.yehezgun.com"
-  }
+    "API_ENDPOINT": "https://shortin-api.yehezgun.com",
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
 }
