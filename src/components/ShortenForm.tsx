@@ -1,13 +1,22 @@
-import { useReducer } from "hono/jsx";
+import { useReducer, useRef } from "hono/jsx";
 import { formReducer, initialFormState } from "@/lib/formReducer";
 import { generateQRCodePNG, generateQRCodeWithText } from "@/lib/qrcode";
 
 export default function ShortenForm() {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
+  const latestSubmission = useRef(0);
+  const copyResetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const resultSubmission = latestSubmission.current;
+  const shortUrl = state.result
+    ? `${window.location.origin}/${state.result.shortCode}`
+    : "";
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
+    const submission = ++latestSubmission.current;
+    clearTimeout(copyResetTimer.current);
+    copyResetTimer.current = undefined;
     dispatch({ type: "SUBMIT_START" });
 
     try {
@@ -21,6 +30,7 @@ export default function ShortenForm() {
       });
 
       const data = (await response.json()) as any;
+      if (submission !== latestSubmission.current) return;
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to shorten URL");
@@ -34,6 +44,7 @@ export default function ShortenForm() {
         },
       });
     } catch (err: any) {
+      if (submission !== latestSubmission.current) return;
       dispatch({ type: "SUBMIT_ERROR", payload: err.message });
     }
   };
@@ -41,19 +52,20 @@ export default function ShortenForm() {
   const handleCopy = async () => {
     if (!state.result) return;
 
-    const shortUrl = `${window.location.origin}/${state.result.shortCode}`;
     try {
       await navigator.clipboard.writeText(shortUrl);
+      if (resultSubmission !== latestSubmission.current) return;
+
       dispatch({ type: "COPY_SUCCESS" });
-      setTimeout(() => dispatch({ type: "COPY_RESET" }), 2000);
+      clearTimeout(copyResetTimer.current);
+      copyResetTimer.current = setTimeout(() => {
+        copyResetTimer.current = undefined;
+        dispatch({ type: "COPY_RESET" });
+      }, 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
   };
-
-  const shortUrl = state.result
-    ? `${window.location.origin}/${state.result.shortCode}`
-    : "";
 
   const handleGenerateQRCode = async () => {
     if (!state.result) return;
@@ -67,8 +79,10 @@ export default function ShortenForm() {
         darkColor: '#000000',
         lightColor: '#ffffff',
       });
+      if (resultSubmission !== latestSubmission.current) return;
       dispatch({ type: "QR_CODE_SUCCESS", payload: qrDataUrl });
     } catch (err) {
+      if (resultSubmission !== latestSubmission.current) return;
       console.error("Failed to generate QR code:", err);
       dispatch({ type: "QR_CODE_HIDE" });
     }
@@ -91,7 +105,8 @@ export default function ShortenForm() {
           textColor: "#374151",
         }
       );
-      
+      if (resultSubmission !== latestSubmission.current) return;
+
       const link = document.createElement('a');
       link.download = `qrcode-${state.result.shortCode}.png`;
       link.href = imageWithText;
