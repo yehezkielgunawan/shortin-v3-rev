@@ -33,8 +33,8 @@ A minimalist, responsive, and accessible URL shortener service built with **Hono
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18+
-- [pnpm](https://pnpm.io/) (recommended) or npm
+- [Node.js](https://nodejs.org/) 26 LTS, as specified in `.nvmrc` (`nvm install` and `nvm use`)
+- [pnpm](https://pnpm.io/) at the version pinned in `package.json`
 
 ### Installation
 
@@ -44,7 +44,7 @@ git clone https://github.com/yehezkielgunawan/shortin-v3-rev.git
 cd shortin-v3-rev
 
 # Install dependencies
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 ### Development
@@ -72,15 +72,25 @@ pnpm test:coverage
 ### Build & Deploy
 
 ```bash
+# Run the CI checks: unit tests, production build, and a Wrangler deploy dry run
+pnpm check
+
 # Build for production
 pnpm build
 
 # Preview production build locally
 pnpm cf:preview
 
-# Deploy to Cloudflare Workers
+# Deploy to the Worker configured for local CLI use
 pnpm cf:deploy
 ```
+
+Production deploys to `shortin-v3` are started manually from `main` in GitHub
+Actions. Before running the workflow, configure the `production` GitHub
+environment to allow deployments only from `main`. Store
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as environment secrets and
+remove any repository-level copies once the environment secrets are in place.
+PR checks and the deploy dry run do not require these credentials.
 
 ### Type Generation
 
