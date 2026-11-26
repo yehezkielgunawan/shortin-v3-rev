@@ -64,8 +64,10 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         result: null,
         error: "",
         warning: "",
+        copied: false,
         showQrCode: false,
         qrCodeDataUrl: "",
+        qrCodeLoading: false,
       };
 
     case "SUBMIT_SUCCESS":

@@ -85,8 +85,10 @@ describe("formReducer", () => {
         },
         error: "Previous error",
         warning: "Previous warning",
+        copied: true,
         showQrCode: true,
         qrCodeDataUrl: "data:image/png;base64,old...",
+        qrCodeLoading: true,
       };
 
       const action: FormAction = { type: "SUBMIT_START" };
@@ -97,8 +99,10 @@ describe("formReducer", () => {
       expect(newState.result).toBeNull();
       expect(newState.error).toBe("");
       expect(newState.warning).toBe("");
+      expect(newState.copied).toBe(false);
       expect(newState.showQrCode).toBe(false);
       expect(newState.qrCodeDataUrl).toBe("");
+      expect(newState.qrCodeLoading).toBe(false);
       expect(newState.url).toBe("https://example.com"); // URL should be preserved
     });
   });
