@@ -1,65 +1,69 @@
-import { useState, useEffect } from "hono/jsx";
+import { useLayoutEffect, useState } from "hono/jsx";
 
 interface RedirectPageProps {
   code: string;
 }
 
+type RedirectState =
+  | { status: "loading" }
+  | { status: "redirecting"; seconds: number }
+  | { status: "not-found" }
+  | { status: "error" };
+
 export default function RedirectPage({ code }: RedirectPageProps) {
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(2);
+  const [state, setState] = useState<RedirectState>({ status: "loading" });
 
-  useEffect(() => {
-    let mounted = true;
+  useLayoutEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    let countdownTimer: ReturnType<typeof setTimeout> | undefined;
+    let navigationTimer: ReturnType<typeof setTimeout> | undefined;
+    setState({ status: "loading" });
 
-    async function redirect() {
+    async function lookUpDestination() {
       try {
-        const response = await fetch("/api/" + code);
-        const data = (await response.json()) as {
-          url?: string;
-          error?: string;
-        };
+        const response = await fetch("/api/" + code, { signal });
+        if (signal.aborted) return;
 
-        if (!mounted) return;
-
-        if (response.ok && data.url) {
-          // Start countdown
-          const countdownInterval = setInterval(() => {
-            setCountdown((prev) => {
-              if (prev <= 1) {
-                clearInterval(countdownInterval);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-
-          setTimeout(() => {
-            if (mounted && data.url) {
-              window.location.href = data.url;
-            }
-          }, 2000);
-        } else {
-          throw new Error(data.error || "Short code not found");
+        if (!response.ok) {
+          setState({ status: response.status === 404 ? "not-found" : "error" });
+          return;
         }
-      } catch (err: any) {
-        if (mounted) {
-          setError(err.message);
-          setLoading(false);
+
+        const data = (await response.json()) as { url?: unknown } | null;
+        if (signal.aborted) return;
+
+        const destination = data?.url;
+        if (typeof destination !== "string" || !destination.trim()) {
+          setState({ status: "error" });
+          return;
         }
+
+        setState({ status: "redirecting", seconds: 2 });
+        countdownTimer = setTimeout(() => {
+          setState({ status: "redirecting", seconds: 1 });
+        }, 1000);
+        navigationTimer = setTimeout(() => {
+          window.location.href = destination;
+        }, 2000);
+      } catch {
+        if (!signal.aborted) setState({ status: "error" });
       }
     }
 
-    redirect();
+    void lookUpDestination();
 
     return () => {
-      mounted = false;
+      controller.abort();
+      clearTimeout(countdownTimer);
+      clearTimeout(navigationTimer);
     };
   }, [code]);
 
-  if (error) {
+  if (state.status === "not-found" || state.status === "error") {
+    const notFound = state.status === "not-found";
     return (
-      <main 
+      <main
         class="min-h-screen bg-linear-to-br from-red-50 to-pink-100 flex items-center justify-center px-4"
         role="main"
         aria-labelledby="error-heading"
@@ -67,10 +71,12 @@ export default function RedirectPage({ code }: RedirectPageProps) {
         <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
           <div aria-hidden="true" class="text-6xl mb-4">❌</div>
           <h1 id="error-heading" class="text-2xl font-bold text-gray-900 mb-2">
-            Link Not Found
+            {notFound ? "Link Not Found" : "Unable to load this link"}
           </h1>
           <p class="text-gray-600 mb-6" role="alert">
-            {error}
+            {notFound
+              ? "Short code not found."
+              : "Please try opening this link again in a moment."}
           </p>
           <a
             href="/"
@@ -84,35 +90,36 @@ export default function RedirectPage({ code }: RedirectPageProps) {
   }
 
   return (
-    <main 
+    <main
       class="min-h-screen bg-linear-to-br from-indigo-50 to-purple-100 flex items-center justify-center px-4"
       role="main"
       aria-labelledby="redirect-heading"
-      aria-busy={loading}
     >
       <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
         <div class="mb-6" aria-hidden="true">
-          <div 
+          <div
             class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-indigo-600"
           ></div>
         </div>
-        
-        {/* Screen reader announcement */}
+
         <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
-          Redirecting you to your destination in {countdown} seconds
+          {state.status === "loading"
+            ? "Looking up link…"
+            : `Redirecting you to your destination in ${state.seconds} ${state.seconds === 1 ? "second" : "seconds"}.`}
         </div>
-        
+
         <h1 id="redirect-heading" class="text-2xl font-bold text-gray-900 mb-2">
-          Redirecting...
+          {state.status === "loading" ? "Looking up link…" : "Redirecting..."}
         </h1>
         <p class="text-gray-600 mb-4">
           Please wait while we take you to your destination.
         </p>
-        
-        {/* Visual countdown */}
-        <p class="text-sm text-indigo-600 font-medium" aria-hidden="true">
-          Redirecting in {countdown}s
-        </p>
+
+        {state.status === "redirecting" && (
+          <p class="text-sm text-indigo-600 font-medium" aria-hidden="true">
+            Redirecting in {state.seconds}s
+          </p>
+        )}
       </div>
     </main>
   );
