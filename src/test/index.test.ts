@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import app from "@/index";
 
 describe("Hono App Routes", () => {
@@ -86,18 +86,72 @@ describe("Hono App Routes", () => {
   });
 
   describe("API Routes Structure", () => {
-    it("POST /api/shorten route exists", async () => {
-      // Without mocking fetch, this will fail but we can verify the route exists
-      const res = await app.request("/api/shorten", {
+    const env = { API_ENDPOINT: "https://shortin-api.example" };
+    const url = "https://example.com";
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it.each([{ url }, { url, shortCodeInput: "" }])(
+      "POST /api/shorten lets the backend generate the alias for %j",
+      async (body) => {
+        const result = {
+          id: "id_1",
+          url,
+          shortCode: "aB3xYz",
+          createdAt: "2026-11-26T00:00:00.000Z",
+          updatedAt: "2026-11-26T00:00:00.000Z",
+          count: 0,
+        };
+        const fetchMock = vi
+          .fn()
+          .mockResolvedValue(Response.json(result, { status: 201 }));
+        vi.stubGlobal("fetch", fetchMock);
+
+        const res = await app.request(
+          "/api/shorten",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          },
+          env,
+        );
+
+        expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`${env.API_ENDPOINT}/shorten`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        expect(res.status).toBe(201);
+        expect(await res.json()).toEqual(result);
+      },
+    );
+
+    it("POST /api/shorten forwards a custom alias and relays a duplicate-alias error", async () => {
+      const body = JSON.stringify({ url, shortCodeInput: "Custom123" });
+      const error = { error: "Short code already in use" };
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(Response.json(error, { status: 400 }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const res = await app.request(
+        "/api/shorten",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        },
+        env,
+      );
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`${env.API_ENDPOINT}/shorten`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: "https://example.com" }),
+        body,
       });
-
-      // Route exists, returns 500 because fetch to external API fails in test env
-      expect(res.status).toBe(500);
-      const data = await res.json();
-      expect(data.error).toBe("Failed to shorten URL");
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual(error);
     });
 
     it("GET /api/:code route exists", async () => {
@@ -108,12 +162,20 @@ describe("Hono App Routes", () => {
       expect(data.error).toBe("Failed to fetch URL");
     });
 
-    it("GET /api/:code/stats route exists", async () => {
-      const res = await app.request("/api/testcode/stats");
+    it.each([
+      { status: 200, body: { count: 42 } },
+      { status: 404, body: { error: "Short code not found" } },
+    ])("GET /api/:code/stats relays an upstream $status", async ({ status, body }) => {
+      const fetchMock = vi.fn().mockResolvedValue(Response.json(body, { status }));
+      vi.stubGlobal("fetch", fetchMock);
 
-      expect(res.status).toBe(500);
-      const data = await res.json();
-      expect(data.error).toBe("Failed to fetch stats");
+      const res = await app.request("/api/testcode/stats", undefined, env);
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        `${env.API_ENDPOINT}/shorten/testcode/stats`,
+      );
+      expect(res.status).toBe(status);
+      expect(await res.json()).toEqual(body);
     });
 
     it("PUT /api/:code route exists", async () => {
