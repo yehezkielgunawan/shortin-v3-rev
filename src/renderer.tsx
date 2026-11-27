@@ -13,8 +13,9 @@ export const renderer = jsxRenderer(({ children }) => {
           name="description"
           content="A minimalist and accessible URL shortener service. Shorten your long URLs instantly with custom short codes."
         />
-        <meta name="theme-color" content="#4f46e5" />
+        <meta name="theme-color" content="#f7f6ef" />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
         <ViteClient />
         <Link href="/src/style.css" rel="stylesheet" />
@@ -54,11 +55,18 @@ export const renderer = jsxRenderer(({ children }) => {
         {/* Skip to main content link for keyboard navigation */}
         <a
           href="#main-content"
-          class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          class="skip-link"
         >
           Skip to main content
         </a>
-        {children}
+        <div class="site-shell">
+          <header class="site-header">
+            <a class="wordmark" href="/" aria-label="Shortin home">Shortin<span aria-hidden="true">.</span></a>
+            <span class="site-header-note">A little link goes a long way.</span>
+          </header>
+          {children}
+          <footer class="site-footer">Made for sharing.</footer>
+        </div>
       </body>
     </html>
   );

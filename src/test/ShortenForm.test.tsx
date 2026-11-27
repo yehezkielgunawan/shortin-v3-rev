@@ -72,6 +72,13 @@ describe("ShortenForm result actions", () => {
     )!;
   }
 
+  it("shows a visible label for the generated link", async () => {
+    await submit("first");
+    const label = container.querySelector<HTMLLabelElement>('label[for="shortened-url"]');
+    expect(label?.textContent).toContain("Your shortened URL");
+    expect(label?.classList.contains("sr-only")).toBe(false);
+  });
+
   it("ignores a clipboard write that finishes after a new result", async () => {
     const previousCopy = Promise.withResolvers<void>();
     copy.mockReturnValueOnce(previousCopy.promise);

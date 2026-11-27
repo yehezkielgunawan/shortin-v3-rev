@@ -15,15 +15,16 @@ app.get("/", (c) => {
   return c.render(
     <main
       id="main-content"
-      class="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8"
+      class="page-main"
       role="main"
     >
-      <div class="max-w-2xl mx-auto">
-        <article class="bg-white rounded-lg shadow-xl p-8">
-          <header class="mb-8 text-center">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">URL Shortener</h1>
-            <p class="text-gray-600">Shorten your long URLs instantly</p>
-          </header>
+      <div class="content-column">
+        <article>
+          <div class="page-intro">
+            <p class="eyebrow">A simpler way to share</p>
+            <h1>Shorten a link<span class="heading-dot">.</span></h1>
+            <p>Paste a long URL and make it easier to share.</p>
+          </div>
 
           <div
             id="shorten-form-container"
@@ -31,9 +32,6 @@ app.get("/", (c) => {
           ></div>
         </article>
 
-        <footer class="mt-8 text-center text-sm text-gray-500">
-          <p>A simple, fast, and accessible URL shortener.</p>
-        </footer>
       </div>
 
       <Script type="module" src="/src/client/main.tsx" />
@@ -47,7 +45,9 @@ app.get("/:code", async (c) => {
 
   return c.render(
     <>
-      <div id="redirect-container"></div>
+      <main id="main-content" class="page-main" role="main">
+        <div id="redirect-container" class="content-column"></div>
+      </main>
 
       <Script type="module" src="/src/client/redirect.tsx" data-code={code} />
     </>

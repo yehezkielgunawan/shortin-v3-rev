@@ -63,44 +63,29 @@ export default function RedirectPage({ code }: RedirectPageProps) {
   if (state.status === "not-found" || state.status === "error") {
     const notFound = state.status === "not-found";
     return (
-      <main
-        class="min-h-screen bg-linear-to-br from-red-50 to-pink-100 flex items-center justify-center px-4"
-        role="main"
-        aria-labelledby="error-heading"
-      >
-        <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
-          <div aria-hidden="true" class="text-6xl mb-4">❌</div>
-          <h1 id="error-heading" class="text-2xl font-bold text-gray-900 mb-2">
+      <section class="status-page" aria-labelledby="error-heading">
+          <p class="eyebrow">Shortin / Link</p>
+          <h1 id="error-heading">
             {notFound ? "Link Not Found" : "Unable to load this link"}
           </h1>
-          <p class="text-gray-600 mb-6" role="alert">
+          <p class="status-description" role="alert">
             {notFound
               ? "Short code not found."
               : "Please try opening this link again in a moment."}
           </p>
           <a
             href="/"
-            class="inline-block bg-indigo-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+            class="primary-button status-action"
           >
-            Go to Homepage
+            Back to Shortin
           </a>
-        </div>
-      </main>
+      </section>
     );
   }
 
   return (
-    <main
-      class="min-h-screen bg-linear-to-br from-indigo-50 to-purple-100 flex items-center justify-center px-4"
-      role="main"
-      aria-labelledby="redirect-heading"
-    >
-      <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center">
-        <div class="mb-6" aria-hidden="true">
-          <div
-            class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-indigo-600"
-          ></div>
-        </div>
+    <section class="status-page" aria-labelledby="redirect-heading">
+        <p class="eyebrow">Shortin / Link</p>
 
         <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
           {state.status === "loading"
@@ -108,19 +93,19 @@ export default function RedirectPage({ code }: RedirectPageProps) {
             : `Redirecting you to your destination in ${state.seconds} ${state.seconds === 1 ? "second" : "seconds"}.`}
         </div>
 
-        <h1 id="redirect-heading" class="text-2xl font-bold text-gray-900 mb-2">
+        <h1 id="redirect-heading">
           {state.status === "loading" ? "Looking up link…" : "Redirecting..."}
         </h1>
-        <p class="text-gray-600 mb-4">
+        <p class="status-description">
           Please wait while we take you to your destination.
         </p>
 
         {state.status === "redirecting" && (
-          <p class="text-sm text-indigo-600 font-medium" aria-hidden="true">
+          <p class="countdown" aria-hidden="true">
             Redirecting in {state.seconds}s
           </p>
         )}
-      </div>
-    </main>
+        <div class="progress-track" aria-hidden="true"><div class="progress-indicator"></div></div>
+    </section>
   );
 }

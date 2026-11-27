@@ -19,6 +19,12 @@ describe("Hono App Routes", () => {
       expect(html).toContain("Shortin - URL Shortener");
     });
 
+    it("uses the new SVG link mark as the browser icon", async () => {
+      const html = await (await app.request("/")).text();
+      expect(html).toContain('href="/favicon.svg"');
+      expect(html).toContain('type="image/svg+xml"');
+    });
+
     it("should include accessibility attributes", async () => {
       const res = await app.request("/");
 
@@ -56,6 +62,14 @@ describe("Hono App Routes", () => {
   });
 
   describe("GET /:code - Redirect Page", () => {
+    it("provides the same branded shell and skip-link target before client rendering", async () => {
+      const res = await app.request("/abc123");
+      const document = new DOMParser().parseFromString(await res.text(), "text/html");
+      expect(document.querySelector("header a[href='/']")?.textContent).toContain("Shortin");
+      expect(document.querySelectorAll("main#main-content")).toHaveLength(1);
+      expect(document.querySelector("#main-content #redirect-container")).not.toBeNull();
+    });
+
     it("should return redirect page with code parameter", async () => {
       const res = await app.request("/abc123");
 
