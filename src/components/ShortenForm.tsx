@@ -119,11 +119,11 @@ export default function ShortenForm() {
   };
 
   return (
-    <div class="space-y-6">
-      <form onSubmit={handleSubmit} class="space-y-6" aria-label="URL shortening form">
+    <div class="form-area">
+      <form onSubmit={handleSubmit} class="shorten-form" aria-label="URL shortening form">
         <div>
-          <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
-            Enter Long URL <span class="text-red-500" aria-hidden="true">*</span>
+          <label for="url" class="field-label">
+            Destination URL <span class="required-mark" aria-hidden="true">*</span>
             <span class="sr-only">(required)</span>
           </label>
           <input
@@ -141,7 +141,7 @@ export default function ShortenForm() {
                 payload: (e.target as HTMLInputElement).value,
               })
             }
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+            class="text-field"
           />
           <p id="url-hint" class="sr-only">
             Enter the full URL you want to shorten, including https://
@@ -151,9 +151,9 @@ export default function ShortenForm() {
         <div>
           <label
             for="shortCodeInput"
-            class="block text-sm font-medium text-gray-700 mb-2"
+            class="field-label"
           >
-            Custom Short Code (optional)
+            Custom code <span class="optional-label">Optional</span>
           </label>
           <input
             type="text"
@@ -169,9 +169,9 @@ export default function ShortenForm() {
                 payload: (e.target as HTMLInputElement).value,
               })
             }
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+            class="text-field"
           />
-          <p id="shortcode-hint" class="mt-1 text-xs text-gray-500">
+          <p id="shortcode-hint" class="field-hint">
             Only letters, numbers, hyphens, and underscores. Leave empty for a random code.
           </p>
         </div>
@@ -180,7 +180,7 @@ export default function ShortenForm() {
           type="submit"
           disabled={state.loading}
           aria-busy={state.loading}
-          class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="primary-button submit-button"
         >
           {state.loading ? (
             <>
@@ -202,35 +202,32 @@ export default function ShortenForm() {
 
       {state.result && (
         <section 
-          class="mt-8 p-6 bg-green-50 border border-green-200 rounded-lg"
+          class="result-panel"
           aria-labelledby="success-heading"
         >
-          <h2 id="success-heading" class="text-lg font-semibold text-green-900 mb-3">
-            <span aria-hidden="true">✓ </span>
-            URL Shortened Successfully
+          <h2 id="success-heading" class="result-heading">
+            Your link is ready.
           </h2>
-          <div class="flex items-center gap-2">
-            <label for="shortened-url" class="sr-only">
-              Your shortened URL
-            </label>
+          <label for="shortened-url" class="field-label">Your shortened URL</label>
+          <div class="result-row">
             <input
               type="text"
               id="shortened-url"
               value={shortUrl}
               readonly
               aria-readonly="true"
-              class="flex-1 px-4 py-2 bg-white border border-green-300 rounded-lg text-gray-900 font-mono text-sm"
+              class="text-field result-url"
             />
             <button
               type="button"
               onClick={handleCopy}
               aria-label={state.copied ? "URL copied to clipboard" : "Copy shortened URL to clipboard"}
-              class={`px-4 py-2 ${state.copied ? "bg-green-800" : "bg-green-600"} text-white rounded-lg font-semibold hover:bg-green-700 transition`}
+              class="primary-button copy-button"
             >
               {state.copied ? "Copied!" : "Copy"}
             </button>
           </div>
-          <p class="mt-3 text-sm text-gray-600">
+          <p class="result-details">
             <span class="sr-only">URL details: </span>
             Created: <time datetime={state.result.createdAt}>{new Date(state.result.createdAt).toLocaleString()}</time>
             <span aria-hidden="true"> | </span>
@@ -239,17 +236,17 @@ export default function ShortenForm() {
           </p>
 
           {/* QR Code Button */}
-          <div class="mt-4 pt-4 border-t border-green-200">
+          <div class="qr-actions">
             <button
               type="button"
               onClick={handleGenerateQRCode}
               disabled={state.qrCodeLoading}
               aria-busy={state.qrCodeLoading}
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              class="secondary-button"
             >
               {state.qrCodeLoading ? (
                 <>
-                  <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -257,7 +254,7 @@ export default function ShortenForm() {
                 </>
               ) : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                   </svg>
                   {state.showQrCode && state.qrCodeDataUrl ? "Regenerate QR Code" : "Generate QR Code"}
@@ -268,23 +265,25 @@ export default function ShortenForm() {
 
           {/* QR Code Display */}
           {state.showQrCode && state.qrCodeDataUrl && (
-            <div class="mt-4 flex flex-col items-center gap-4">
-              <div class="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col items-center">
+            <div class="qr-display">
+              <div class="qr-image">
                 <img 
                   src={state.qrCodeDataUrl} 
                   alt={`QR Code for ${shortUrl}`}
-                  class="w-64 h-64"
+                  width="256"
+                  height="256"
+                  class="qr-code"
                 />
-                <p class="mt-3 text-sm text-gray-700 font-mono break-all text-center max-w-[256px]">
+                <p class="qr-url">
                   {shortUrl}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleDownloadQRCode}
-                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition"
+                class="secondary-button"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Download QR Code
@@ -298,9 +297,9 @@ export default function ShortenForm() {
         <div 
           role="alert" 
           aria-live="polite"
-          class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg"
+          class="feedback feedback-warning"
         >
-          <p class="text-yellow-800 flex items-start gap-2">
+          <p>
             <span aria-hidden="true" class="text-xl">⚠️</span>
             <span>
               <span class="sr-only">Warning: </span>
@@ -314,9 +313,9 @@ export default function ShortenForm() {
         <div 
           role="alert" 
           aria-live="assertive"
-          class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg"
+          class="feedback feedback-error"
         >
-          <p class="text-red-800 flex items-start gap-2">
+          <p>
             <span aria-hidden="true" class="text-xl">❌</span>
             <span>
               <span class="sr-only">Error: </span>
